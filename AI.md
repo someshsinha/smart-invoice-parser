@@ -16,7 +16,7 @@
 
 ## Verification
 - **Test Command Executed:** `pytest -q`
-  - Result: `50 passed in 0.52s` (100% pass rate, offline socket blocker active).
+  - Result: `64 passed in 2.39s` across 13 test suites (100% pass rate, offline socket blocker active).
 - **Evaluation Command Executed:** `python -m evaluation.run --dir samples`
   - Result: `100.00% exact match` across all 8 fields, `p50 latency = 10.4ms`.
 - **Manual Checks Performed:**
