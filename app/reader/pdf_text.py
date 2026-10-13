@@ -5,7 +5,7 @@ Extracts words, lines, and cells with bounding boxes and font sizes from digital
 
 from dataclasses import dataclass, field
 from typing import List, Tuple, Optional
-import fitz  # PyMuPDF
+import pymupdf as fitz
 from app.reader.normalize import normalize_text
 
 

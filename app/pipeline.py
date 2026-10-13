@@ -8,6 +8,7 @@ from app.schemas import InvoiceExtractionResponse, FieldConfidence
 from app.reader.pdf_text import extract_document_text
 from app.extract.doctype import classify_document_type
 from app.extract.vendor import resolve_vendor
+from app.extract.dates import extract_dates
 
 
 def process_invoice_pdf(pdf_bytes: bytes, debug: bool = False) -> Tuple[InvoiceExtractionResponse, Optional[dict]]:
@@ -58,19 +59,27 @@ def process_invoice_pdf(pdf_bytes: bytes, debug: bool = False) -> Tuple[InvoiceE
         )
         return response, ({"doc_type": doc_type} if debug else None)
 
-    # Baseline stub for genuine invoice (further extractors will be integrated next)
-    confidence = FieldConfidence(vendor=vendor_conf)
+    # 5. Extract Dates & Payment Terms (Rule O1)
+    inv_date, inv_date_conf, due_date, due_date_conf, date_warnings = extract_dates(parsed_doc, vendor)
+    all_warnings = vendor_warnings + date_warnings
+
+    confidence = FieldConfidence(
+        vendor=vendor_conf,
+        invoice_date=inv_date_conf,
+        due_date=due_date_conf,
+    )
     response = InvoiceExtractionResponse(
         vendor=vendor,
         invoice_number=None,
-        invoice_date=None,
-        due_date=None,
+        invoice_date=inv_date,
+        due_date=due_date,
         currency=None,
         subtotal=None,
         tax=None,
         total=None,
         confidence=confidence,
-        warnings=vendor_warnings,
+        warnings=all_warnings,
         debug={"parsed_lines": len(parsed_doc.pages[0].lines)} if debug and parsed_doc.pages else None,
     )
-    return response, ({"vendor": vendor} if debug else None)
+    return response, ({"vendor": vendor, "invoice_date": inv_date, "due_date": due_date} if debug else None)
+

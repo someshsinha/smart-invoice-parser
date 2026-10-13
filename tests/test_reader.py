@@ -1,5 +1,5 @@
 import pytest
-import fitz
+import pymupdf as fitz
 from app.reader.pdf_text import extract_document_text
 from app.reader.normalize import normalize_text
 from app.pipeline import process_invoice_pdf
