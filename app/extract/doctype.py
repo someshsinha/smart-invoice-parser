@@ -62,27 +62,25 @@ def classify_document_type(doc: ParsedDocument) -> Tuple[bool, str, Optional[str
         if is_top_region or is_large_font:
             title_lines.append(line.text.lower())
 
-    title_zone_text = "   ".join(title_lines)
-
-    # Check for explicit invoice indicators in the title zone
-    has_invoice_title = any(re.search(pat, title_zone_text) for pat in INVOICE_TITLE_PATTERNS)
+    # Check for explicit invoice indicators in title lines
+    has_invoice_keyword = any(
+        re.search(r"\b(tax invoice|rechnung|rechnungsbeleg|invoice)\b", t)
+        for t in title_lines
+    )
 
     # Check for competing non-invoice keywords in the title zone
     for doc_type, patterns in NON_INVOICE_TYPES.items():
         for pat in patterns:
-            if re.search(pat, title_zone_text):
-                # If document explicitly states "INVOICE" or "TAX INVOICE", it is an invoice unless the primary title is a non-invoice
-                if has_invoice_title:
-                    # An invoice mentioning a quote/po/delivery note reference in the title zone is still an invoice
-                    is_reference = bool(
-                        re.search(r"\b(delivery note|statement|quote|quotation|po|order)\s*(no|num|#|ref|reference|dated|date)\b", title_zone_text)
+            for t_line in title_lines:
+                if re.search(pat, t_line):
+                    # Check if this line is just a reference field (e.g. "Purchase Order: 123", "Delivery note ref: 456")
+                    is_ref = bool(
+                        re.search(r"\b(purchase order|p\.o\.|order|po|quote|quotation|estimate|delivery note|statement)\s*([:#]|no\b|num\b|ref\b|dated\b)", t_line)
                     )
-                    if is_reference:
+                    # If document has an explicit invoice header/number and this is merely a reference field, invoice wins
+                    if has_invoice_keyword and is_ref:
                         continue
-                    # If invoice title exists and this is not a reference, invoice still wins unless non-invoice is the sole large title
-                    continue
-
-                return False, doc_type, warn_non_invoice_doctype(doc_type)
+                    return False, doc_type, warn_non_invoice_doctype(doc_type)
 
     return True, "invoice", None
 

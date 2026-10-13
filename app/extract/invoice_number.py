@@ -27,8 +27,9 @@ def clean_invoice_number_value(raw: str) -> Optional[str]:
     cleaned = raw.strip()
     cleaned = re.sub(r"^(?:invoice|rechnung|reference)\b\s*[:#.]*\s*", "", cleaned, flags=re.IGNORECASE).strip()
     cleaned = re.sub(r"^(?:inv|ref)\b\s*[:#.]+\s*", "", cleaned, flags=re.IGNORECASE).strip()
-    cleaned = re.sub(r"^(?:no|nr)\b\.?\s*[:#]?\s*", "", cleaned, flags=re.IGNORECASE).strip()
+    cleaned = re.sub(r"^(?:no|nr)\b\s*[:#.]+\s*", "", cleaned, flags=re.IGNORECASE).strip()
     cleaned = cleaned.lstrip("#: \t").rstrip(".,;:|")
+
 
 
 
