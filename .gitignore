@@ -29,3 +29,6 @@ htmlcov/
 # Generated datasets (keep samples/ and tests/fixtures/ tracked)
 data/
 *.log
+
+# Personal explanations file (not committed)
+explanations*

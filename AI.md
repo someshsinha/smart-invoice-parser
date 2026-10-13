@@ -1,14 +1,27 @@
-# AI.md: AI Tool Usage Disclosure
+# AI Usage Disclosure
 
-In compliance with the assignment brief, this document outlines all AI tools utilized during the design and development of the invoice field extraction service.
+## Tools Used
+- **Tool:** Antigravity AI Coding Assistant / Gemini 3.8 Flash
+- **Purpose:** Planning, implementation assistance, debugging, and test generation.
 
-## 1. Tools Used
-- **AI Coding Assistant (Antigravity IDE / Gemini 3.8 Flash):**
-  - Architecture and PRD refinement (translating requirements into rigorous modular specifications).
-  - Code generation, scaffolding of boilerplate (FastAPI endpoints, Pydantic models, geometry utilities).
-  - Test case generation and regression harness scaffolding.
-  - Pair programming and debugging.
+## How AI Was Used
 
-## 2. Human Supervision & Code Accountability
-- **Reviewer:** Somesh Sinha (Candidate).
-- **Attribution Statement:** All architectural decisions, parsing heuristics, regex constraints, and edge-case behaviors have been reviewed, verified, and understood by the candidate. The candidate is prepared to defend and explain every component, algorithm, and line of code in this repository.
+| Area | AI assistance | My responsibility |
+|---|---|---|
+| Planning | Helped break down the assignment and create feature plans | Reviewed priorities against the official requirements |
+| Implementation | Suggested or generated code for selected features | Reviewed the code and checked its behaviour |
+| Testing | Suggested pytest test cases and helped write test code | Reviewed test intent, ran the tests, and investigated failures |
+| Debugging | Helped interpret errors and suggest fixes | Verified fixes by rerunning relevant checks |
+| Documentation | Helped draft or revise documentation | Checked claims against the actual implementation |
+
+## Verification
+- Record the exact test command used and its actual result.
+- Record manual checks performed.
+- List important known limitations and unverified behaviour.
+
+## Human Review
+- Reviewed and verified directory structure, requirements, schemas, offline test fixtures, and endpoints.
+- Read through all parsing logic, regexes, and geometry extraction functions to ensure full comprehension and defense capability.
+
+## Limitations
+AI-generated suggestions may contain mistakes. Code and tests were checked to the extent documented above. Do not interpret passing tests as proof that every possible invoice will be handled correctly.
