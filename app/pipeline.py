@@ -9,6 +9,7 @@ from app.reader.pdf_text import extract_document_text
 from app.extract.doctype import classify_document_type
 from app.extract.vendor import resolve_vendor
 from app.extract.dates import extract_dates
+from app.extract.amounts import extract_amounts
 
 
 def process_invoice_pdf(pdf_bytes: bytes, debug: bool = False) -> Tuple[InvoiceExtractionResponse, Optional[dict]]:
@@ -61,12 +62,21 @@ def process_invoice_pdf(pdf_bytes: bytes, debug: bool = False) -> Tuple[InvoiceE
 
     # 5. Extract Dates & Payment Terms (Rule O1)
     inv_date, inv_date_conf, due_date, due_date_conf, date_warnings = extract_dates(parsed_doc, vendor)
-    all_warnings = vendor_warnings + date_warnings
+
+    # 6. Extract Amounts with Arithmetic Solver (Rule O2 & Rule O5)
+    subtotal, sub_conf, tax, tax_conf, total, tot_conf, amount_warnings = extract_amounts(parsed_doc, vendor)
+
+    all_warnings = vendor_warnings + date_warnings + amount_warnings
 
     confidence = FieldConfidence(
         vendor=vendor_conf,
+        invoice_number=0.0,
         invoice_date=inv_date_conf,
         due_date=due_date_conf,
+        currency=0.0,
+        subtotal=sub_conf,
+        tax=tax_conf,
+        total=tot_conf,
     )
     response = InvoiceExtractionResponse(
         vendor=vendor,
@@ -74,12 +84,13 @@ def process_invoice_pdf(pdf_bytes: bytes, debug: bool = False) -> Tuple[InvoiceE
         invoice_date=inv_date,
         due_date=due_date,
         currency=None,
-        subtotal=None,
-        tax=None,
-        total=None,
+        subtotal=subtotal,
+        tax=tax,
+        total=total,
         confidence=confidence,
         warnings=all_warnings,
         debug={"parsed_lines": len(parsed_doc.pages[0].lines)} if debug and parsed_doc.pages else None,
     )
-    return response, ({"vendor": vendor, "invoice_date": inv_date, "due_date": due_date} if debug else None)
+    return response, ({"vendor": vendor, "total": total} if debug else None)
+
 
