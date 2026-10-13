@@ -1,0 +1,14 @@
+{
+  "vendor": "unknown",
+  "invoice_number": "7781",
+  "invoice_date": "2026-08-21",
+  "due_date": null,
+  "currency": "INR",
+  "subtotal": 12000.0,
+  "tax": 2160.0,
+  "total": 14160.0,
+  "warnings": [
+    "Vendor name not in the canonical list.",
+    "No due date or payment terms found."
+  ]
+}

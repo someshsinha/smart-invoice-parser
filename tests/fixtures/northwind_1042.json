@@ -1,0 +1,11 @@
+{
+  "vendor": "Northwind Traders",
+  "invoice_number": "NW-1042",
+  "invoice_date": "2026-09-03",
+  "due_date": "2026-10-03",
+  "currency": "GBP",
+  "subtotal": 361.6,
+  "tax": 72.32,
+  "total": 433.92,
+  "warnings": []
+}

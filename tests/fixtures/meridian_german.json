@@ -1,0 +1,11 @@
+{
+  "vendor": "Meridian Industrial",
+  "invoice_number": "MI-8821",
+  "invoice_date": "2026-09-12",
+  "due_date": "2026-10-12",
+  "currency": "EUR",
+  "subtotal": 1200.0,
+  "tax": 228.0,
+  "total": 1428.0,
+  "warnings": []
+}
