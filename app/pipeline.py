@@ -11,6 +11,7 @@ from app.extract.vendor import resolve_vendor
 from app.extract.dates import extract_dates
 from app.extract.amounts import extract_amounts
 from app.extract.currency import extract_currency
+from app.extract.invoice_number import extract_invoice_number
 
 
 def process_invoice_pdf(pdf_bytes: bytes, debug: bool = False) -> Tuple[InvoiceExtractionResponse, Optional[dict]]:
@@ -64,17 +65,20 @@ def process_invoice_pdf(pdf_bytes: bytes, debug: bool = False) -> Tuple[InvoiceE
     # 5. Extract Dates & Payment Terms (Rule O1)
     inv_date, inv_date_conf, due_date, due_date_conf, date_warnings = extract_dates(parsed_doc, vendor)
 
-    # 6. Extract Amounts with Arithmetic Solver (Rule O2 & Rule O5)
+    # 6. Extract Invoice Number (F9)
+    inv_num, inv_num_conf, inv_num_warnings = extract_invoice_number(parsed_doc)
+
+    # 7. Extract Amounts with Arithmetic Solver (Rule O2 & Rule O5)
     subtotal, sub_conf, tax, tax_conf, total, tot_conf, amount_warnings = extract_amounts(parsed_doc, vendor)
 
-    # 7. Extract Currency (Rule O3 & Rule O5)
+    # 8. Extract Currency (Rule O3 & Rule O5)
     currency, curr_conf, curr_warnings = extract_currency(parsed_doc, vendor)
 
-    all_warnings = vendor_warnings + date_warnings + amount_warnings + curr_warnings
+    all_warnings = vendor_warnings + date_warnings + inv_num_warnings + amount_warnings + curr_warnings
 
     confidence = FieldConfidence(
         vendor=vendor_conf,
-        invoice_number=0.0,
+        invoice_number=inv_num_conf,
         invoice_date=inv_date_conf,
         due_date=due_date_conf,
         currency=curr_conf,
@@ -84,7 +88,7 @@ def process_invoice_pdf(pdf_bytes: bytes, debug: bool = False) -> Tuple[InvoiceE
     )
     response = InvoiceExtractionResponse(
         vendor=vendor,
-        invoice_number=None,
+        invoice_number=inv_num,
         invoice_date=inv_date,
         due_date=due_date,
         currency=currency,
@@ -95,7 +99,8 @@ def process_invoice_pdf(pdf_bytes: bytes, debug: bool = False) -> Tuple[InvoiceE
         warnings=all_warnings,
         debug={"parsed_lines": len(parsed_doc.pages[0].lines)} if debug and parsed_doc.pages else None,
     )
-    return response, ({"vendor": vendor, "currency": currency, "total": total} if debug else None)
+    return response, ({"vendor": vendor, "invoice_number": inv_num, "total": total} if debug else None)
+
 
 
 
