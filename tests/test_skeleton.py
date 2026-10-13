@@ -75,3 +75,26 @@ def test_offline_constraint_blocks_network():
     with pytest.raises(RuntimeError, match="Network call blocked by offline constraint"):
         s = socket.socket()
         s.connect(("8.8.8.8", 53))
+
+
+def test_extract_debug_parameter(client):
+    from pathlib import Path
+    pdf_bytes = (Path("samples") / "northwind_1042.pdf").read_bytes()
+    files = {"file": ("northwind.pdf", pdf_bytes, "application/pdf")}
+
+    # 1. Without debug query param
+    resp_no_debug = client.post("/extract", files=files)
+    assert resp_no_debug.status_code == 200
+    assert resp_no_debug.json().get("debug") is None
+
+    # 2. With debug=true
+    files = {"file": ("northwind.pdf", pdf_bytes, "application/pdf")}
+    resp_debug = client.post("/extract?debug=true", files=files)
+    assert resp_debug.status_code == 200
+    debug_payload = resp_debug.json().get("debug")
+    assert debug_payload is not None
+    assert "timings_ms" in debug_payload
+    assert "document" in debug_payload
+    assert "arithmetic" in debug_payload
+    assert debug_payload["arithmetic"]["is_balanced"] is True
+

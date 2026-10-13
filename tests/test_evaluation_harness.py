@@ -57,3 +57,13 @@ def test_run_evaluation_on_samples_directory():
     assert metrics["overall_accuracy"] == 1.0
     for field, acc in metrics["field_accuracy"].items():
         assert acc == 1.0, f"Field {field} did not achieve 100% on samples"
+
+
+def test_compute_calibration_metrics():
+    from evaluation.calibration import compute_calibration_metrics
+    samples_dir = Path(__file__).resolve().parent.parent / "samples"
+    brier, ece, bins = compute_calibration_metrics(samples_dir)
+    assert 0.0 <= brier <= 1.0
+    assert 0.0 <= ece <= 1.0
+    assert len(bins) == 5
+
