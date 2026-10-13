@@ -10,6 +10,7 @@ from app.extract.doctype import classify_document_type
 from app.extract.vendor import resolve_vendor
 from app.extract.dates import extract_dates
 from app.extract.amounts import extract_amounts
+from app.extract.currency import extract_currency
 
 
 def process_invoice_pdf(pdf_bytes: bytes, debug: bool = False) -> Tuple[InvoiceExtractionResponse, Optional[dict]]:
@@ -66,14 +67,17 @@ def process_invoice_pdf(pdf_bytes: bytes, debug: bool = False) -> Tuple[InvoiceE
     # 6. Extract Amounts with Arithmetic Solver (Rule O2 & Rule O5)
     subtotal, sub_conf, tax, tax_conf, total, tot_conf, amount_warnings = extract_amounts(parsed_doc, vendor)
 
-    all_warnings = vendor_warnings + date_warnings + amount_warnings
+    # 7. Extract Currency (Rule O3 & Rule O5)
+    currency, curr_conf, curr_warnings = extract_currency(parsed_doc, vendor)
+
+    all_warnings = vendor_warnings + date_warnings + amount_warnings + curr_warnings
 
     confidence = FieldConfidence(
         vendor=vendor_conf,
         invoice_number=0.0,
         invoice_date=inv_date_conf,
         due_date=due_date_conf,
-        currency=0.0,
+        currency=curr_conf,
         subtotal=sub_conf,
         tax=tax_conf,
         total=tot_conf,
@@ -83,7 +87,7 @@ def process_invoice_pdf(pdf_bytes: bytes, debug: bool = False) -> Tuple[InvoiceE
         invoice_number=None,
         invoice_date=inv_date,
         due_date=due_date,
-        currency=None,
+        currency=currency,
         subtotal=subtotal,
         tax=tax,
         total=total,
@@ -91,6 +95,7 @@ def process_invoice_pdf(pdf_bytes: bytes, debug: bool = False) -> Tuple[InvoiceE
         warnings=all_warnings,
         debug={"parsed_lines": len(parsed_doc.pages[0].lines)} if debug and parsed_doc.pages else None,
     )
-    return response, ({"vendor": vendor, "total": total} if debug else None)
+    return response, ({"vendor": vendor, "currency": currency, "total": total} if debug else None)
+
 
 

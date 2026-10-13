@@ -5,16 +5,35 @@ from app.reader.normalize import normalize_text
 from app.pipeline import process_invoice_pdf
 
 
+import io
+from pathlib import Path
+from reportlab.pdfgen import canvas
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+
+FONT_PATH = Path(__file__).resolve().parent.parent / "generator" / "fonts" / "DejaVuSans.ttf"
+HAS_DEJAVU = False
+if FONT_PATH.exists():
+    try:
+        pdfmetrics.registerFont(TTFont("DejaVuSans", str(FONT_PATH)))
+        HAS_DEJAVU = True
+    except Exception:
+        pass
+
+
 def create_simple_test_pdf(text_lines):
-    doc = fitz.open()
-    page = doc.new_page()
-    y = 50.0
+    buf = io.BytesIO()
+    c = canvas.Canvas(buf)
+    font_name = "DejaVuSans" if HAS_DEJAVU else "Helvetica"
+    c.setFont(font_name, 10.0)
+    y = 750.0
     for line in text_lines:
-        page.insert_text((50.0, y), line, fontsize=11)
-        y += 20.0
-    pdf_bytes = doc.tobytes()
-    doc.close()
-    return pdf_bytes
+        c.drawString(50.0, y, line)
+        y -= 20.0
+    c.save()
+    return buf.getvalue()
+
+
 
 
 def test_text_normalization():
