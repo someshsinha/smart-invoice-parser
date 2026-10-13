@@ -12,6 +12,8 @@ from app.extract.dates import extract_dates
 from app.extract.amounts import extract_amounts
 from app.extract.currency import extract_currency
 from app.extract.invoice_number import extract_invoice_number
+from app.extract.confidence import calibrate_confidences
+
 
 
 def process_invoice_pdf(pdf_bytes: bytes, debug: bool = False) -> Tuple[InvoiceExtractionResponse, Optional[dict]]:
@@ -76,16 +78,20 @@ def process_invoice_pdf(pdf_bytes: bytes, debug: bool = False) -> Tuple[InvoiceE
 
     all_warnings = vendor_warnings + date_warnings + inv_num_warnings + amount_warnings + curr_warnings
 
-    confidence = FieldConfidence(
-        vendor=vendor_conf,
-        invoice_number=inv_num_conf,
-        invoice_date=inv_date_conf,
-        due_date=due_date_conf,
-        currency=curr_conf,
-        subtotal=sub_conf,
-        tax=tax_conf,
-        total=tot_conf,
+    # 9. Compute Calibrated Confidences (F13)
+    confidence = calibrate_confidences(
+        vendor=vendor,
+        invoice_number=inv_num,
+        invoice_date=inv_date,
+        due_date=due_date,
+        currency=currency,
+        subtotal=subtotal,
+        tax=tax,
+        total=total,
+        warnings=all_warnings,
+        has_text=parsed_doc.has_text,
     )
+
     response = InvoiceExtractionResponse(
         vendor=vendor,
         invoice_number=inv_num,
