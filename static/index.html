@@ -404,7 +404,16 @@
       ];
 
       fieldsGrid.innerHTML = fields.map(f => {
-        const val = data[f.key] !== null ? data[f.key] : '<span style="color: var(--text-muted); font-style: italic;">null</span>';
+        const rawVal = data[f.key];
+        const hasVal = rawVal !== null && rawVal !== undefined;
+        let displayVal;
+        if (!hasVal) {
+          displayVal = '<span style="color: var(--text-muted); font-style: italic;">—</span>';
+        } else if (typeof rawVal === 'number') {
+          displayVal = rawVal.toFixed(2);
+        } else {
+          displayVal = String(rawVal);
+        }
         const conf = data.confidence && data.confidence[f.key] !== undefined ? data.confidence[f.key] : 0.0;
         const pct = Math.round(conf * 100);
         let confClass = 'conf-low';
@@ -414,7 +423,7 @@
         return `
           <div class="field-item">
             <div class="field-label">${f.label}</div>
-            <div class="field-value">${val}</div>
+            <div class="field-value">${displayVal}</div>
             <div style="font-size: 0.75rem; color: var(--text-muted); margin-top: 0.4rem; display: flex; justify-content: space-between;">
               <span>Confidence</span>
               <span>${pct}%</span>

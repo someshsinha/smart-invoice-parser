@@ -16,12 +16,13 @@
 
 ## Verification
 - **Test Command Executed:** `pytest -q`
-  - Result: `64 passed in 2.39s` across 13 test suites (100% pass rate, offline socket blocker active).
+  - Result: `69 passed in 1.90s` across 14 test suites (100% pass rate, offline socket blocker active).
 - **Evaluation Command Executed:** `python -m evaluation.run --dir samples`
-  - Result: `100.00% exact match` across all 8 fields, `p50 latency = 10.4ms`.
+  - Result: `100.00% exact match` across all 8 fields, `p50 latency = 9.7ms`.
 - **Manual Checks Performed:**
+  - Verified all 9 test pack PDFs (`01_northwind_official_example.pdf` through `09_missing_fields_invoice.pdf`): 100% pass against `EXPECTED_RESULTS.json`.
   - Verified `GET /health` returns `200 {"status": "ok"}`.
-  - Verified `POST /extract` handles multipart uploads, returns 400 on missing/non-PDF files, and parses sample PDFs.
+  - Verified `POST /extract` returns all 10 required top-level keys and 8 confidence keys with explicit `null`s for missing fields.
   - Verified interactive single-page web UI at `http://localhost:8000/`.
 - **Known Limitations:**
   - Scanned bitmap PDFs without a text layer are intentionally out of scope and return null fields with an informative warning.

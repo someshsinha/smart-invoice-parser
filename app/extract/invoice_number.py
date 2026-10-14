@@ -26,9 +26,9 @@ def clean_invoice_number_value(raw: str) -> Optional[str]:
     # Strip leading noise prefixes
     cleaned = raw.strip()
     cleaned = re.sub(r"^(?:invoice|rechnung|reference)\b\s*[:#.]*\s*", "", cleaned, flags=re.IGNORECASE).strip()
-    cleaned = re.sub(r"^(?:inv|ref)\b\s*[:#.]+\s*", "", cleaned, flags=re.IGNORECASE).strip()
+    cleaned = re.sub(r"^(?:inv|ref|id)\b\s*[:#.]+\s*", "", cleaned, flags=re.IGNORECASE).strip()
     cleaned = re.sub(r"^(?:no|nr)\b\s*[:#.]+\s*", "", cleaned, flags=re.IGNORECASE).strip()
-    cleaned = cleaned.lstrip("#: \t").rstrip(".,;:|")
+    cleaned = cleaned.lstrip(".:# \t").rstrip(".,;:|")
 
 
 

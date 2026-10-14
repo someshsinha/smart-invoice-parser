@@ -98,3 +98,79 @@ def test_extract_debug_parameter(client):
     assert "arithmetic" in debug_payload
     assert debug_payload["arithmetic"]["is_balanced"] is True
 
+
+def test_schema_non_invoice_delivery_note_all_keys_present(client):
+    from tests.test_reader import create_simple_test_pdf
+    pdf = create_simple_test_pdf([
+        "NORTHWIND TRADERS LTD",
+        "DELIVERY NOTE # DN-9912",
+        "Packing slip for delivery",
+        "Sold to: Bruviti Services Pvt Ltd"
+    ])
+    res = client.post("/extract", files={"file": ("delivery.pdf", pdf, "application/pdf")})
+    assert res.status_code == 200
+    data = res.json()
+
+    # All top-level keys must be present
+    required_keys = ["vendor", "invoice_number", "invoice_date", "due_date", "currency", "subtotal", "tax", "total", "confidence", "warnings"]
+    for k in required_keys:
+        assert k in data, f"Missing required top-level key: {k}"
+
+    # Non-invoice fields must be null
+    assert data["vendor"] == "Northwind Traders"
+    assert data["invoice_number"] is None
+    assert data["invoice_date"] is None
+    assert data["due_date"] is None
+    assert data["currency"] is None
+    assert data["subtotal"] is None
+    assert data["tax"] is None
+    assert data["total"] is None
+
+    # All 8 confidence keys must be present
+    conf = data["confidence"]
+    assert len(conf) == 8
+    for k in ["vendor", "invoice_number", "invoice_date", "due_date", "currency", "subtotal", "tax", "total"]:
+        assert k in conf
+        assert conf[k] == 0.0 or (k == "vendor" and conf[k] > 0.0)
+
+    # Must contain delivery note warning
+    assert any("delivery note" in w.lower() for w in data["warnings"])
+
+
+def test_schema_missing_due_date_and_tax_preserves_keys(client):
+    from tests.test_reader import create_simple_test_pdf
+    # Invoice with missing due date/terms and no tax line
+    pdf = create_simple_test_pdf([
+        "Kestrel Components Inc.",
+        "Invoice No: KC-4401",
+        "Invoice Date: 09/03/2026",
+        "Sold to: Bruviti Services Pvt Ltd",
+        "Subtotal: USD 145.00",
+        "Total: USD 145.00"
+    ])
+    res = client.post("/extract", files={"file": ("invoice.pdf", pdf, "application/pdf")})
+    assert res.status_code == 200
+    data = res.json()
+
+    required_keys = ["vendor", "invoice_number", "invoice_date", "due_date", "currency", "subtotal", "tax", "total", "confidence", "warnings"]
+    for k in required_keys:
+        assert k in data, f"Missing required key: {k}"
+
+    assert data["vendor"] == "Kestrel Components"
+    assert data["invoice_number"] == "KC-4401"
+    assert data["invoice_date"] == "2026-09-03"
+    assert data["due_date"] is None
+    assert data["tax"] is None
+    assert data["subtotal"] == 145.0
+    assert data["total"] == 145.0
+
+    # Confidence must have all 8 keys
+    conf = data["confidence"]
+    assert len(conf) == 8
+    for k in ["vendor", "invoice_number", "invoice_date", "due_date", "currency", "subtotal", "tax", "total"]:
+        assert k in conf
+        assert isinstance(conf[k], float)
+    assert conf["due_date"] == 0.0
+    assert conf["tax"] == 0.0
+
+

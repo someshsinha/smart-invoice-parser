@@ -61,7 +61,7 @@ def index():
     return HTMLResponse(content="<h1>Invoice Field Extraction Service</h1><p>UI loading...</p>")
 
 
-@app.post("/extract", response_model=InvoiceExtractionResponse, response_model_exclude_none=True)
+@app.post("/extract", response_model=InvoiceExtractionResponse)
 async def extract(
     file: Optional[UploadFile] = File(None),
     debug: bool = Query(False, description="Include provenance evidence in response"),
@@ -69,6 +69,7 @@ async def extract(
     """
     Extracts invoice header fields from uploaded PDF.
     Enforces strict validation, size limits, and error handling as specified in PRD §3.5.
+    Always returns all 8 header fields + confidence (8 keys) + warnings.
     """
     # 1. Missing file parameter -> 400
     if file is None or file.filename is None or file.filename.strip() == "":
@@ -94,7 +95,10 @@ async def extract(
 
     try:
         response, evidence = process_invoice_pdf(content, debug=debug)
-        return response
+        data = response.model_dump()
+        if not debug:
+            data.pop("debug", None)
+        return JSONResponse(status_code=status.HTTP_200_OK, content=data)
     except Exception as e:
         logger.error(f"Error processing PDF: {str(e)}", exc_info=True)
         return JSONResponse(

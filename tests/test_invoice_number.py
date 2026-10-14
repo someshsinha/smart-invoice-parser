@@ -58,3 +58,34 @@ def test_distractor_numbers_rejected():
     assert response.invoice_number != "PO-998877"
     assert response.invoice_number != "CUST-4433"
     assert response.invoice_number != "GB 123 4567 89"
+
+
+def test_invoice_id_label():
+    # Fix 2: Support for "Invoice ID" label
+    pdf = create_simple_test_pdf([
+        "Sakura Precision KK",
+        "Invoice ID: SP-90326",
+        "Invoice Date: 03/09/2026",
+        "Total: JPY 165000"
+    ])
+    response, _ = process_invoice_pdf(pdf)
+    assert response.invoice_number == "SP-90326"
+    assert response.confidence.invoice_number >= 0.90
+
+
+def test_invoice_number_leading_punctuation_cleaning():
+    # Fix 3: Strip leading label punctuation like "." from ". PP-7781"
+    assert clean_invoice_number_value(". PP-7781") == "PP-7781"
+    assert clean_invoice_number_value(": SP-90326") == "SP-90326"
+    assert clean_invoice_number_value("Invoice ID: SP-90326") == "SP-90326"
+    assert clean_invoice_number_value("MI-260903") == "MI-260903"
+
+    pdf = create_simple_test_pdf([
+        "Pinecrest Packaging Pvt Ltd",
+        "Invoice No. PP-7781",
+        "Invoice Date: 21/08/2026",
+        "Total: INR 14160.00"
+    ])
+    response, _ = process_invoice_pdf(pdf)
+    assert response.invoice_number == "PP-7781"
+

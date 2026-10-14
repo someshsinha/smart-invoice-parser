@@ -9,6 +9,7 @@ import re
 from datetime import date, timedelta
 from app.reader.pdf_text import ParsedDocument
 from app.knowledge.vendors import CANONICAL_VENDORS
+from app.knowledge.locales import infer_locale_from_document
 from app.knowledge.labels import LABELS
 from app.parsing.dates import parse_date_string
 from app.parsing.terms import parse_payment_terms
@@ -36,10 +37,13 @@ def extract_dates(
     if not doc.pages or not doc.has_text:
         return None, 0.0, None, 0.0, []
 
-    # Get vendor locale metadata
-    vendor_meta = CANONICAL_VENDORS.get(vendor_name, {})
-    date_order = vendor_meta.get("date_order", "DMY")
-    country = vendor_meta.get("country", "United Kingdom")
+    # Get vendor locale metadata (or infer from document if unknown/unregistered vendor)
+    vendor_meta = CANONICAL_VENDORS.get(vendor_name)
+    if vendor_meta:
+        date_order = vendor_meta.get("date_order", "DMY")
+        country = vendor_meta.get("country", "United Kingdom")
+    else:
+        country, date_order = infer_locale_from_document(doc)
 
     warnings: List[str] = []
 

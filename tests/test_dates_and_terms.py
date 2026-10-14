@@ -100,3 +100,21 @@ def test_rule_o1_neither_due_date_nor_terms():
     response, _ = process_invoice_pdf(pdf)
     assert response.due_date is None
     assert any("No due date or payment terms found" in w for w in response.warnings)
+
+
+def test_unknown_vendor_us_address_ambiguous_date():
+    # Unknown vendor with explicit US address and ambiguous date 9/3/26
+    pdf = create_simple_test_pdf([
+        "ACME FIELD SUPPLIES",
+        "Austin, Texas, USA",
+        "Invoice Date: 9/3/26",
+        "Terms: Net 10",
+        "Bill to: Bruviti Services Pvt Ltd",
+        "Total: USD 250.00"
+    ])
+    response, _ = process_invoice_pdf(pdf)
+    assert response.vendor == "unknown"
+    assert response.invoice_date == "2026-09-03"  # Month first: Sep 3
+    assert response.due_date == "2026-09-13"  # Sep 3 + 10 days
+    assert any("month-first" in w.lower() for w in response.warnings)
+

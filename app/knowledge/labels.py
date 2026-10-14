@@ -5,9 +5,9 @@ Note: Test-pool labels are deliberately omitted during development to prevent da
 
 LABELS = {
     "invoice_number": [
-        "invoice no", "invoice number", "invoice #", "inv no", "inv #", "inv.",
-        "invoice ref", "reference", "reference #", "ref no", "rechnungsnummer",
-        "rechnungs-nr", "re-nr"
+        "invoice no", "invoice number", "invoice #", "invoice id", "inv no", "inv #",
+        "inv id", "inv.", "invoice ref", "reference", "reference #", "ref no",
+        "rechnungsnummer", "rechnungs-nr", "re-nr"
     ],
     "invoice_date": [
         "invoice date", "date of invoice", "date", "dated", "issue date",
