@@ -55,10 +55,10 @@ Example JSON response:
   "tax": 72.32,
   "total": 433.92,
   "confidence": {
-    "vendor": 0.98,
+    "vendor": 0.95,
     "invoice_number": 0.95,
-    "invoice_date": 0.90,
-    "due_date": 0.90,
+    "invoice_date": 0.92,
+    "due_date": 0.9,
     "currency": 0.95,
     "subtotal": 0.97,
     "tax": 0.97,
@@ -73,10 +73,10 @@ Example JSON response:
 - `invoice_number` (`string` or `null`): Exactly as printed, trimmed, case and hyphens preserved.
 - `invoice_date` (`string` or `null`): ISO `YYYY-MM-DD`.
 - `due_date` (`string` or `null`): ISO `YYYY-MM-DD`. Converted from payment terms (e.g. `Net 30`) if only terms are printed.
-- `currency` (`string`): ISO 4217 code (`GBP`, `USD`, `EUR`, `JPY`, `INR`).
+- `currency` (`string` or `null`): ISO 4217 code (`GBP`, `USD`, `EUR`, `JPY`, `INR`), or `null` if unidentifiable or non-invoice.
 - `subtotal` (`number` or `null`): Pre-tax amount, two decimals, no thousands separators.
-- `tax` (`number` or `null`): Total tax amount on invoice.
-- `total` (`number` or `null`): Amount payable.
+- `tax` (`number` or `null`): Total tax amount on invoice, or `null` if absent or non-invoice.
+- `total` (`number` or `null`): Amount payable, or `null` if absent or non-invoice.
 - `confidence` (`object`): Calibrated float between `0.0` and `1.0` for each of the eight fields. Null fields receive `0.0`.
 - `warnings` (`array of strings`): Diagnostic warnings explaining ambiguities, terms derivation, or arithmetic mismatches.
 
@@ -90,7 +90,7 @@ Install development dependencies and run the offline test suite:
 pip install -r requirements-dev.txt && pytest -q
 ```
 
-All 50+ tests run strictly without network access, enforced by an automated socket blocker in `tests/conftest.py`.
+All 94 tests run strictly without network access, enforced by an automated socket blocker in `tests/conftest.py`.
 
 ---
 
@@ -109,7 +109,7 @@ INVOICE EXTRACTION EVALUATION REPORT (EXACT MATCH)
 ======================================================================
 Total Documents Evaluated : 4
 Overall Exact Match Score : 100.00%
-Latency Percentiles (CPU) : p50 = 10.4ms | p95 = 36.0ms | max = 36.0ms
+Latency Percentiles (CPU) : p50 = 12.7ms | p95 = 30.4ms | max = 30.4ms
 ----------------------------------------------------------------------
 Field              | Exact Match Accuracy  
 ----------------------------------------------------------------------

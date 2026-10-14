@@ -8,7 +8,7 @@ from typing import Optional, List, Tuple
 import re
 from decimal import Decimal, ROUND_HALF_UP
 
-CURRENCY_STRIP_REGEX = r"(?i)\b(?:GBP|USD|EUR|JPY|INR|Rs\.?|US\$)\b|[£$€¥₹￥円]"
+CURRENCY_STRIP_REGEX = r"(?i)\b(?:GBP|USD|EUR|JPY|INR|CAD|AUD|CHF|SEK|NOK|NZD|SGD|Rs\.?|US\$)\b|[£$€¥₹￥円]"
 PERCENTAGE_REGEX = r"\d+(?:[.,]\d+)?\s*%"
 
 
@@ -33,8 +33,16 @@ def parse_money_amount(
     if is_percentage_token(text):
         return None
 
+    # Exclude dates (e.g. 14.10.2026, 2026-10-14, 03/09/2026)
+    if re.search(r"\b\d{1,4}[./\-]\d{1,2}[./\-]\d{2,4}\b", text):
+        return None
+
     # Strip currency codes and symbols
     clean = re.sub(CURRENCY_STRIP_REGEX, "", text).strip()
+
+    # If non-currency alphabetic characters remain, this is not a pure monetary number
+    if re.search(r"[a-zA-Z]", clean):
+        return None
     # Strip wrapping parentheses for positive numbers or keep track if negative
     is_negative = False
     if clean.startswith("(") and clean.endswith(")"):

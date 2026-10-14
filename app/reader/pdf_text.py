@@ -7,6 +7,7 @@ from dataclasses import dataclass, field
 from typing import List, Tuple, Optional
 import pymupdf as fitz
 from app.reader.normalize import normalize_text
+from app.config import CELL_SPLIT_MIN_GAP_POINTS, CELL_SPLIT_HEIGHT_RATIO
 
 
 @dataclass
@@ -222,7 +223,7 @@ def _cluster_words_into_lines(words: List[TextWord], page_idx: int) -> List[Text
         # Sort words left-to-right
         sorted_cluster = sorted(cluster, key=lambda w: w.x0)
 
-        # Split cluster into cells if horizontal gap is significant (e.g. gap > 12 pt or 1.8x word height)
+        # Split cluster into cells if horizontal gap is significant (gap > max(14.0 pt, 1.4 * character height))
         cells: List[TextCell] = []
         current_cell_words: List[TextWord] = [sorted_cluster[0]]
 
@@ -231,8 +232,8 @@ def _cluster_words_into_lines(words: List[TextWord], page_idx: int) -> List[Text
             curr_word = sorted_cluster[i]
             gap = curr_word.x0 - prev_word.x1
             avg_h = (prev_word.height + curr_word.height) / 2.0
-            # A gap > 14 pts or > 1.4 * height indicates separate columnar cells
-            if gap > max(14.0, avg_h * 1.4):
+            # A gap > CELL_SPLIT_MIN_GAP_POINTS (14.0 pt) or > CELL_SPLIT_HEIGHT_RATIO (1.4 * height) indicates separate columnar cells
+            if gap > max(CELL_SPLIT_MIN_GAP_POINTS, avg_h * CELL_SPLIT_HEIGHT_RATIO):
                 cell_text = " ".join(w.text for w in current_cell_words)
                 cells.append(
                     TextCell(

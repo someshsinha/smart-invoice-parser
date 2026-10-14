@@ -40,7 +40,7 @@ Evaluated via `python -m evaluation.run --dir samples`:
 ```text
 Total Documents Evaluated : 4
 Overall Exact Match Score : 100.00%
-Latency Percentiles (CPU) : p50 = 10.4ms | p95 = 36.0ms | max = 36.0ms
+Latency Percentiles (CPU) : p50 = 12.7ms | p95 = 30.4ms | max = 30.4ms
 
 Field              | Exact Match Accuracy
 vendor             | 100.00%

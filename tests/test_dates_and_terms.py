@@ -118,3 +118,16 @@ def test_unknown_vendor_us_address_ambiguous_date():
     assert response.due_date == "2026-09-13"  # Sep 3 + 10 days
     assert any("month-first" in w.lower() for w in response.warnings)
 
+
+def test_official_northwind_date_warnings_empty():
+    from pathlib import Path
+    pdf_bytes = (Path("samples") / "northwind_1042.pdf").read_bytes()
+    response, _ = process_invoice_pdf(pdf_bytes)
+    assert response.vendor == "Northwind Traders"
+    assert response.invoice_date == "2026-09-03"
+    assert response.due_date == "2026-10-03"
+    # Official Northwind sample should have no warnings
+    assert response.warnings == []
+    assert response.confidence.invoice_date >= 0.90
+    assert response.confidence.due_date >= 0.90
+

@@ -18,7 +18,9 @@ PDF_MAGIC_BYTES = b"%PDF-"
 
 # Geometry & reader parameters
 LINE_MERGE_Y_TOLERANCE_RATIO = 0.5   # Vertical overlap tolerance relative to word height
-CELL_GAP_SPACE_WIDTH_RATIO = 1.5     # Horizontal gap multiplier to split words into separate cells
+CELL_SPLIT_MIN_GAP_POINTS = 14.0     # Minimum horizontal gap in points to split cells
+CELL_SPLIT_HEIGHT_RATIO = 1.4        # Gap multiplier relative to font height to split cells
+CELL_GAP_SPACE_WIDTH_RATIO = 1.4     # Backward-compatible alias for cell split height ratio
 FRAGMENT_MERGE_GAP_RATIO = 0.3       # Gap multiplier to merge fragmented words on same baseline
 
 # Title & Document-type classification

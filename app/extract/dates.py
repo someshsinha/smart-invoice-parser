@@ -80,18 +80,23 @@ def extract_dates(
                     d_iso, d_warn = _extract_date_from_cell_or_line(cell_text, line_text, date_order, country)
                     if d_iso:
                         printed_due_date = d_iso
-                        due_date_conf = 0.80 if d_warn else 0.90
-                        if d_warn:
-                            warnings.append(d_warn)
+                        # Standard day-first dates from known canonical day-first vendors are not ambiguous anomalies
+                        suppress_standard_warn = bool(vendor_meta and date_order == "DMY" and d_warn and "day-first" in d_warn)
+                        effective_warn = None if suppress_standard_warn else d_warn
+                        due_date_conf = 0.80 if effective_warn else 0.90
+                        if effective_warn:
+                            warnings.append(effective_warn)
 
                 # B. Invoice date check
                 if printed_inv_date is None and any(re.search(rf"\b{lbl}\b", cell_lower) for lbl in LABELS["invoice_date"]):
                     d_iso, d_warn = _extract_date_from_cell_or_line(cell_text, line_text, date_order, country)
                     if d_iso:
                         printed_inv_date = d_iso
-                        inv_date_conf = 0.80 if d_warn else 0.90
-                        if d_warn:
-                            warnings.append(d_warn)
+                        suppress_standard_warn = bool(vendor_meta and date_order == "DMY" and d_warn and "day-first" in d_warn)
+                        effective_warn = None if suppress_standard_warn else d_warn
+                        inv_date_conf = 0.80 if effective_warn else 0.90
+                        if effective_warn:
+                            warnings.append(effective_warn)
 
     # Fallback scan: if invoice date not found by label, look for dates in header region of page 1
     if printed_inv_date is None and doc.pages:
@@ -101,9 +106,11 @@ def extract_dates(
             d_iso, d_warn = parse_date_string(line.text, date_order, country)
             if d_iso:
                 printed_inv_date = d_iso
-                inv_date_conf = 0.70
-                if d_warn:
-                    warnings.append(d_warn)
+                suppress_standard_warn = bool(vendor_meta and date_order == "DMY" and d_warn and "day-first" in d_warn)
+                effective_warn = None if suppress_standard_warn else d_warn
+                inv_date_conf = 0.70 if effective_warn else 0.85
+                if effective_warn:
+                    warnings.append(effective_warn)
                 break
 
     # Resolve Due Date with Payment Terms (Rule O1)

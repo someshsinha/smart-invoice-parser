@@ -16,11 +16,12 @@
 
 ## Verification
 - **Test Command Executed:** `pytest -q`
-  - Result: `69 passed in 1.90s` across 14 test suites (100% pass rate, offline socket blocker active).
+  - Result: `94 passed in 2.72s` across 15 test suites (100% pass rate, offline socket blocker active).
 - **Evaluation Command Executed:** `python -m evaluation.run --dir samples`
-  - Result: `100.00% exact match` across all 8 fields, `p50 latency = 9.7ms`.
+  - Result: `100.00% exact match` across all 8 fields, `p50 latency = 12.7ms`.
 - **Manual Checks Performed:**
-  - Verified all 9 test pack PDFs (`01_northwind_official_example.pdf` through `09_missing_fields_invoice.pdf`): 100% pass against `EXPECTED_RESULTS.json`.
+  - Verified all 25 test pack PDFs across both manual test packs (Cases 01–09 from `bruviti_manual_test_pack` and Cases 10–25 from `bruviti_edge_case_test_pack`): 100% exact match (25/25) against expected business fields.
+  - Verified official Northwind sample produces zero warnings (`warnings: []`) matching PRD §3.2.
   - Verified `GET /health` returns `200 {"status": "ok"}`.
   - Verified `POST /extract` returns all 10 required top-level keys and 8 confidence keys with explicit `null`s for missing fields.
   - Verified interactive single-page web UI at `http://localhost:8000/`.
