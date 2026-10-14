@@ -31,6 +31,8 @@ http://localhost:8000/
 ```
 The single-page web UI provides interactive drag-and-drop PDF extraction, pre-bundled sample invoices, field cards with confidence progress bars, verification warning boxes, and raw JSON copying.
 
+![Smart Invoice Parser Web Interface](Screenshot_20261014_102621.png)
+
 ---
 
 ## 2. API Contract & Extraction Endpoint
@@ -137,6 +139,7 @@ Zero failures found! 100% exact match across all evaluated documents.
 ├── requirements.txt        # Pinned runtime dependencies
 ├── requirements-dev.txt    # Pinned development and testing dependencies
 ├── pytest.ini              # Pytest configuration
+├── Screenshot_20261014_102621.png # Application web UI screenshot
 ├── static/
 │   └── index.html          # Single-page offline web UI
 ├── samples/                # Bundled sample PDFs with paired ground-truth JSON
